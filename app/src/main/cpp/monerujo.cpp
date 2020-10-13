@@ -500,13 +500,11 @@ Java_com_m2049r_xmrwallet_model_WalletManager_isMining(JNIEnv *env, jobject inst
 JNIEXPORT jboolean JNICALL
 Java_com_m2049r_xmrwallet_model_WalletManager_startMining(JNIEnv *env, jobject instance,
                                                           jstring address,
-                                                          jboolean background_mining,
-                                                          jboolean ignore_battery) {
+                                                          jint numThreads) {
     const char *_address = env->GetStringUTFChars(address, NULL);
     bool success =
             Bitmonero::WalletManagerFactory::getWalletManager()->startMining(std::string(_address),
-                                                                             background_mining,
-                                                                             ignore_battery);
+                                                                             numThreads);
     env->ReleaseStringUTFChars(address, _address);
     return static_cast<jboolean>(success);
 }
@@ -925,7 +923,7 @@ Java_com_m2049r_xmrwallet_model_Wallet_createTransactionJ(JNIEnv *env, jobject i
     Bitmonero::PendingTransaction *tx = wallet->createTransaction(_dst_addr, _payment_id,
                                                                   amount, (uint32_t) mixin_count,
                                                                   priority,
-                                                                  (uint32_t) accountIndex);
+                                                                  {(uint32_t) accountIndex});
 
     env->ReleaseStringUTFChars(dst_addr, _dst_addr);
     env->ReleaseStringUTFChars(payment_id, _payment_id);
@@ -943,12 +941,11 @@ Java_com_m2049r_xmrwallet_model_Wallet_createSweepTransaction(JNIEnv *env, jobje
     const char *_payment_id = env->GetStringUTFChars(payment_id, NULL);
     Bitmonero::Wallet *wallet = getHandle<Bitmonero::Wallet>(env, instance);
 
-    Monero::optional<uint64_t> empty;
-
+    std::optional<uint64_t> empty;
     Bitmonero::PendingTransaction *tx = wallet->createTransaction(_dst_addr, _payment_id,
                                                                   empty, (uint32_t) mixin_count,
                                                                   priority,
-                                                                  (uint32_t) accountIndex);
+                                                                  {(uint32_t) accountIndex});
 
     env->ReleaseStringUTFChars(dst_addr, _dst_addr);
     env->ReleaseStringUTFChars(payment_id, _payment_id);
